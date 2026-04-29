@@ -5,7 +5,14 @@
   import PlayerHud from './components/PlayerHud.svelte';
   import Inventory from './components/Inventory.svelte';
   import GameOver from './components/GameOver.svelte';
+
   import meteorImg from './assets/meteor.png';
+
+  import backgroundMusic from './assets/sounds/background.mp3';
+  import shootSound from './assets/sounds/shoot.mp3';
+  import enemyDeathSound from './assets/sounds/enemy-death.mp3';
+  import damageSound from './assets/sounds/damage.mp3';
+  import gameOverSound from './assets/sounds/gameover.mp3';
 
   let gameArea;
   let mouseX = 400;
@@ -37,9 +44,37 @@
   let effectId = 1;
   let nextPowerupType = 'Rapid Fire';
 
+  let musicAudio;
+  let shootAudio;
+  let enemyDeathAudio;
+  let damageAudio;
+  let gameOverAudio;
+  let soundStarted = false;
+
   onMount(() => {
     highscore = Number(localStorage.getItem('spaceHighscore')) || 0;
     createObstacles();
+
+    musicAudio = new Audio(backgroundMusic);
+    musicAudio.loop = true;
+    musicAudio.volume = 0.25;
+
+    musicAudio.addEventListener('ended', () => {
+      musicAudio.currentTime = 0.05;
+      musicAudio.play().catch(() => {});
+    });
+
+    shootAudio = new Audio(shootSound);
+    shootAudio.volume = 0.25;
+
+    enemyDeathAudio = new Audio(enemyDeathSound);
+    enemyDeathAudio.volume = 0.5;
+
+    damageAudio = new Audio(damageSound);
+    damageAudio.volume = 0.6;
+
+    gameOverAudio = new Audio(gameOverSound);
+    gameOverAudio.volume = 0.7;
 
     const loop = setInterval(updateGame, 30);
     const spawnEnemies = setInterval(spawnEnemy, 1500);
@@ -49,6 +84,9 @@
     const autoShoot = setInterval(shoot, 50);
 
     window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('click', startSound);
+    window.addEventListener('keydown', startSound);
+    window.addEventListener('touchstart', startSound);
 
     return () => {
       clearInterval(loop);
@@ -57,9 +95,41 @@
       clearInterval(enemyShoot);
       clearInterval(increaseDifficulty);
       clearInterval(autoShoot);
+
       window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('click', startSound);
+      window.removeEventListener('keydown', startSound);
+      window.removeEventListener('touchstart', startSound);
+
+      if (musicAudio) {
+        musicAudio.pause();
+      }
     };
   });
+
+  function getGameWidth() {
+    return gameArea ? gameArea.clientWidth : 1000;
+  }
+
+  function getGameHeight() {
+    return gameArea ? gameArea.clientHeight : 620;
+  }
+
+  function startSound() {
+    if (soundStarted) return;
+    if (!musicAudio) return;
+
+    soundStarted = true;
+    musicAudio.currentTime = 0;
+    musicAudio.play().catch(() => {});
+  }
+
+  function playSound(audio) {
+    if (!audio) return;
+
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }
 
   function createObstacles() {
     obstacles = [
@@ -82,9 +152,23 @@
   function movePlayer(event) {
     if (gameOver) return;
 
+    startSound();
+
     const rect = gameArea.getBoundingClientRect();
     mouseX = event.clientX - rect.left;
     mouseY = event.clientY - rect.top;
+  }
+
+  function movePlayerTouch(event) {
+    if (gameOver) return;
+
+    startSound();
+
+    const touch = event.touches[0];
+    const rect = gameArea.getBoundingClientRect();
+
+    mouseX = touch.clientX - rect.left;
+    mouseY = touch.clientY - rect.top;
   }
 
   function shoot() {
@@ -106,6 +190,7 @@
       }
     ];
 
+    playSound(shootAudio);
     createEffect(mouseX + 15, mouseY - 20, 'muzzle');
   }
 
@@ -113,13 +198,14 @@
     if (gameOver) return;
     if (enemies.length >= maxEnemies) return;
 
+    const gameWidth = getGameWidth();
+
     enemies = [
       ...enemies,
       {
         id: enemyId++,
-        x: Math.random() * 850 + 50,
+        x: Math.random() * (gameWidth - 100) + 50,
         y: -60,
-        hp: 1,
         speed: Math.random() * 1.5 + difficulty
       }
     ];
@@ -129,6 +215,9 @@
     if (gameOver) return;
     if (powerups.length >= 1) return;
 
+    const gameWidth = getGameWidth();
+    const gameHeight = getGameHeight();
+
     const type = nextPowerupType;
     nextPowerupType = nextPowerupType === 'Rapid Fire' ? 'Life' : 'Rapid Fire';
 
@@ -136,8 +225,8 @@
       ...powerups,
       {
         id: powerupId++,
-        x: Math.random() * 850 + 50,
-        y: Math.random() * 400 + 80,
+        x: Math.random() * (gameWidth - 100) + 50,
+        y: Math.random() * (gameHeight - 180) + 80,
         type
       }
     ];
@@ -162,25 +251,28 @@
   function updateGame() {
     if (gameOver) return;
 
+    const gameWidth = getGameWidth();
+    const gameHeight = getGameHeight();
+
     bullets = bullets
       .map(b => ({ ...b, y: b.y - b.speed }))
       .filter(b => b.y > -20);
 
     enemyBullets = enemyBullets
       .map(b => ({ ...b, y: b.y + b.speed }))
-      .filter(b => b.y < 650);
+      .filter(b => b.y < gameHeight + 50);
 
     enemies = enemies
       .map(e => ({ ...e, y: e.y + e.speed }))
-      .filter(e => e.y < 650);
+      .filter(e => e.y < gameHeight + 50);
 
     obstacles = obstacles.map(o => {
-      let newY = o.y + o.speed + difficulty * 0.2;
+      const newY = o.y + o.speed + difficulty * 0.2;
 
-      if (newY > 650) {
+      if (newY > gameHeight + 80) {
         return {
           ...o,
-          x: Math.random() * 900 + 30,
+          x: Math.random() * (gameWidth - 80) + 40,
           y: -Math.random() * 500 - 100,
           speed: Math.random() * 1.5 + 1.5,
           rotation: Math.random() * 360
@@ -209,6 +301,7 @@
           enemies = enemies.filter(e => e.id !== enemy.id);
           score += 100;
 
+          playSound(enemyDeathAudio);
           createEffect(enemy.x + 25, enemy.y + 25, 'explosion');
         }
       });
@@ -224,6 +317,7 @@
     enemies.forEach(enemy => {
       if (isColliding(enemy, { x: mouseX, y: mouseY }, 50, 50, 40, 40)) {
         enemies = enemies.filter(e => e.id !== enemy.id);
+        playSound(enemyDeathAudio);
         createEffect(enemy.x + 25, enemy.y + 25, 'explosion');
         loseLife();
       }
@@ -238,7 +332,7 @@
             ? {
                 ...o,
                 y: -300,
-                x: Math.random() * 900 + 30,
+                x: Math.random() * (getGameWidth() - 80) + 40,
                 rotation: Math.random() * 360
               }
             : o
@@ -279,6 +373,7 @@
 
   function loseLife() {
     lives -= 1;
+    playSound(damageAudio);
     createEffect(mouseX, mouseY, 'damage');
 
     if (lives <= 0) {
@@ -330,6 +425,12 @@
   function endGame() {
     gameOver = true;
 
+    playSound(gameOverAudio);
+
+    if (musicAudio) {
+      musicAudio.pause();
+    }
+
     if (score > highscore) {
       highscore = score;
       localStorage.setItem('spaceHighscore', String(highscore));
@@ -356,10 +457,15 @@
     inventory = [];
     effects = [];
 
-    mouseX = 400;
-    mouseY = 500;
+    mouseX = getGameWidth() / 2;
+    mouseY = getGameHeight() - 120;
 
     createObstacles();
+
+    if (musicAudio) {
+      musicAudio.currentTime = 0;
+      musicAudio.play().catch(() => {});
+    }
   }
 </script>
 
@@ -373,6 +479,8 @@
     bind:this={gameArea}
     class="game-area"
     on:mousemove={movePlayer}
+    on:touchmove|preventDefault={movePlayerTouch}
+    on:click={startSound}
     role="application"
     tabindex="0"
   >
@@ -432,6 +540,7 @@
     font-family: Arial, sans-serif;
     text-align: center;
     padding: 20px;
+    overflow-x: hidden;
   }
 
   h1 {
@@ -440,8 +549,8 @@
 
   .game-area {
     position: relative;
-    width: 1000px;
-    height: 620px;
+    width: min(1000px, 95vw);
+    height: min(620px, 70vh);
     margin: 20px auto;
 
     background:
@@ -465,6 +574,7 @@
     border-radius: 16px;
     overflow: hidden;
     cursor: none;
+    touch-action: none;
   }
 
   @keyframes spaceMove {
@@ -678,6 +788,58 @@
 
     to {
       transform: scale(1.25);
+    }
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 10px;
+    }
+
+    h1 {
+      font-size: 22px;
+    }
+
+    .game-area {
+      width: 95vw;
+      height: 65vh;
+      border-radius: 12px;
+    }
+
+    .player {
+      font-size: 32px;
+    }
+
+    .enemy {
+      font-size: 36px;
+    }
+
+    .bullet {
+      width: 5px;
+      height: 18px;
+    }
+
+    .enemy-bullet {
+      width: 7px;
+      height: 14px;
+    }
+
+    .powerup {
+      font-size: 28px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .game-area {
+      height: 60vh;
+    }
+
+    .player {
+      font-size: 30px;
+    }
+
+    .enemy {
+      font-size: 34px;
     }
   }
 </style>
