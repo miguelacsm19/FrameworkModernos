@@ -5,6 +5,7 @@
   import PlayerHud from './components/PlayerHud.svelte';
   import Inventory from './components/Inventory.svelte';
   import GameOver from './components/GameOver.svelte';
+  import meteorImg from './assets/meteor.png';
 
   let gameArea;
   let mouseX = 400;
@@ -34,6 +35,7 @@
   let bulletId = 1;
   let powerupId = 1;
   let effectId = 1;
+  let nextPowerupType = 'Rapid Fire';
 
   onMount(() => {
     highscore = Number(localStorage.getItem('spaceHighscore')) || 0;
@@ -61,9 +63,9 @@
 
   function createObstacles() {
     obstacles = [
-      { id: 1, x: 220, y: -100, w: 55, h: 55, speed: 2.2 },
-      { id: 2, x: 620, y: -350, w: 70, h: 70, speed: 1.8 },
-      { id: 3, x: 850, y: -600, w: 60, h: 60, speed: 2 }
+      { id: 1, x: 220, y: -100, w: 70, h: 70, speed: 2.2, rotation: 0 },
+      { id: 2, x: 620, y: -350, w: 85, h: 85, speed: 1.8, rotation: 40 },
+      { id: 3, x: 850, y: -600, w: 75, h: 75, speed: 2, rotation: 90 }
     ];
   }
 
@@ -127,8 +129,8 @@
     if (gameOver) return;
     if (powerups.length >= 1) return;
 
-    const types = ['Rapid Fire', 'Life'];
-    const randomType = types[Math.floor(Math.random() * types.length)];
+    const type = nextPowerupType;
+    nextPowerupType = nextPowerupType === 'Rapid Fire' ? 'Life' : 'Rapid Fire';
 
     powerups = [
       ...powerups,
@@ -136,7 +138,7 @@
         id: powerupId++,
         x: Math.random() * 850 + 50,
         y: Math.random() * 400 + 80,
-        type: randomType
+        type
       }
     ];
   }
@@ -180,13 +182,15 @@
           ...o,
           x: Math.random() * 900 + 30,
           y: -Math.random() * 500 - 100,
-          speed: Math.random() * 1.5 + 1.5
+          speed: Math.random() * 1.5 + 1.5,
+          rotation: Math.random() * 360
         };
       }
 
       return {
         ...o,
-        y: newY
+        y: newY,
+        rotation: (o.rotation || 0) + 3
       };
     });
 
@@ -228,8 +232,17 @@
     obstacles.forEach(obstacle => {
       if (isColliding(obstacle, { x: mouseX, y: mouseY }, obstacle.w, obstacle.h, 40, 40)) {
         loseLife();
-        mouseX = 80;
-        mouseY = 550;
+
+        obstacles = obstacles.map(o =>
+          o.id === obstacle.id
+            ? {
+                ...o,
+                y: -300,
+                x: Math.random() * 900 + 30,
+                rotation: Math.random() * 360
+              }
+            : o
+        );
       }
     });
 
@@ -334,6 +347,7 @@
 
     difficulty = 1;
     maxEnemies = 4;
+    nextPowerupType = 'Rapid Fire';
 
     bullets = [];
     enemyBullets = [];
@@ -387,10 +401,18 @@
     {/each}
 
     {#each obstacles as obstacle}
-      <div
+      <img
+        src={meteorImg}
+        alt="Meteorito"
         class="obstacle"
-        style="left: {obstacle.x}px; top: {obstacle.y}px; width: {obstacle.w}px; height: {obstacle.h}px;"
-      ></div>
+        style="
+          left: {obstacle.x}px;
+          top: {obstacle.y}px;
+          width: {obstacle.w}px;
+          height: {obstacle.h}px;
+          transform: translate(-50%, -50%) rotate({obstacle.rotation || 0}deg);
+        "
+      />
     {/each}
 
     {#each effects as effect}
@@ -511,21 +533,10 @@
 
   .obstacle {
     position: absolute;
-    background: linear-gradient(135deg, #f97316, #7c2d12);
-    border: 2px solid #fed7aa;
-    border-radius: 50%;
-    box-shadow: 0 0 18px #fb923c;
-  }
-
-  .obstacle::after {
-    content: "";
-    position: absolute;
-    width: 70px;
-    height: 18px;
-    background: linear-gradient(90deg, rgba(251, 146, 60, 0.8), transparent);
-    right: 75%;
-    top: 35%;
-    transform: rotate(20deg);
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 3;
+    filter: drop-shadow(0 0 14px #fb923c);
   }
 
   .effect {
