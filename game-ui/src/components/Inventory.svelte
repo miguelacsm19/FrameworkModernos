@@ -1,27 +1,24 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
-
   export let inventory = [];
 
-  const dispatch = createEventDispatcher();
-
-  function usePowerup(item) {
-    dispatch('usePowerup', item);
-  }
+  $: rapidFireCount = inventory.filter(item => item.type === 'Rapid Fire').length;
+  $: lifeCount = inventory.filter(item => item.type === 'Life').length;
 </script>
 
 <div class="inventory">
   <h2>🎒 Inventário</h2>
 
-  {#if inventory.length === 0}
-    <p>Sem powerups</p>
-  {:else}
-    {#each inventory as item}
-      <button on:click={() => usePowerup(item)}>
-        ⚡ Usar {item.type}
-      </button>
-    {/each}
-  {/if}
+  <div class="items">
+    <div class="item">
+      ⚡ Rapid Fire: {rapidFireCount}
+      <span>Tecla Q</span>
+    </div>
+
+    <div class="item">
+      ❤️ Vida: {lifeCount}
+      <span>Tecla E</span>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -29,22 +26,24 @@
     margin-top: 15px;
   }
 
-  button {
-    background: #facc15;
-    color: #111827;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin: 5px;
+  .items {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .item {
+    background: #111827;
+    border: 2px solid #38bdf8;
+    border-radius: 12px;
+    padding: 10px 16px;
     font-weight: bold;
-    cursor: pointer;
   }
 
-  button:hover {
-    background: #fde047;
-  }
-
-  p {
-    color: #cbd5e1;
+  span {
+    display: block;
+    margin-top: 5px;
+    color: #facc15;
+    font-size: 14px;
   }
 </style>
