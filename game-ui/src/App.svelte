@@ -15,13 +15,16 @@
   import gameOverSound from './assets/sounds/gameover.mp3';
 
   let gameArea;
+
+  let gameStarted = false;
+  let gameOver = false;
+
   let mouseX = 400;
   let mouseY = 500;
 
   let lives = 3;
   let score = 0;
   let highscore = 0;
-  let gameOver = false;
 
   let fireRate = 450;
   let lastShot = 0;
@@ -85,7 +88,6 @@
 
     window.addEventListener('keydown', handleKeyPress);
     window.addEventListener('click', startSound);
-    window.addEventListener('keydown', startSound);
     window.addEventListener('touchstart', startSound);
 
     return () => {
@@ -98,12 +100,9 @@
 
       window.removeEventListener('keydown', handleKeyPress);
       window.removeEventListener('click', startSound);
-      window.removeEventListener('keydown', startSound);
       window.removeEventListener('touchstart', startSound);
 
-      if (musicAudio) {
-        musicAudio.pause();
-      }
+      if (musicAudio) musicAudio.pause();
     };
   });
 
@@ -113,6 +112,14 @@
 
   function getGameHeight() {
     return gameArea ? gameArea.clientHeight : 620;
+  }
+
+  function startGame() {
+    gameStarted = true;
+    startSound();
+
+    mouseX = getGameWidth() / 2;
+    mouseY = getGameHeight() - 120;
   }
 
   function startSound() {
@@ -140,7 +147,7 @@
   }
 
   function makeHarder() {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
     difficulty += 0.2;
 
@@ -150,7 +157,7 @@
   }
 
   function movePlayer(event) {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
     startSound();
 
@@ -160,7 +167,7 @@
   }
 
   function movePlayerTouch(event) {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
     startSound();
 
@@ -172,7 +179,7 @@
   }
 
   function shoot() {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
     const now = Date.now();
 
@@ -195,7 +202,7 @@
   }
 
   function spawnEnemy() {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
     if (enemies.length >= maxEnemies) return;
 
     const gameWidth = getGameWidth();
@@ -212,7 +219,7 @@
   }
 
   function spawnPowerup() {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
     if (powerups.length >= 1) return;
 
     const gameWidth = getGameWidth();
@@ -233,7 +240,7 @@
   }
 
   function enemyFire() {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
     enemies.forEach(enemy => {
       enemyBullets = [
@@ -249,7 +256,7 @@
   }
 
   function updateGame() {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
     const gameWidth = getGameWidth();
     const gameHeight = getGameHeight();
@@ -383,7 +390,7 @@
   }
 
   function handleKeyPress(event) {
-    if (gameOver) return;
+    if (!gameStarted || gameOver) return;
 
     const key = event.key.toLowerCase();
 
@@ -470,66 +477,77 @@
 </script>
 
 <main>
-  <h1>🚀 Space Cursor Survival</h1>
+  {#if !gameStarted}
+    <section class="start-screen">
+      <h1>🚀 Space Cursor Survival</h1>
+      <p>Controla a nave com o rato ou com o dedo.</p>
+      <p>Destrói inimigos, evita meteoritos e tenta bater o teu highscore.</p>
+      <p class="controls">Q = Rapid Fire | E = Vida</p>
 
-  <PlayerHud {lives} {score} {highscore} {fireRate} />
-  <Inventory {inventory} />
+      <button on:click={startGame}>PLAY</button>
+    </section>
+  {:else}
+    <h1>🚀 Space Cursor Survival</h1>
 
-  <div
-    bind:this={gameArea}
-    class="game-area"
-    on:mousemove={movePlayer}
-    on:touchmove|preventDefault={movePlayerTouch}
-    on:click={startSound}
-    role="application"
-    tabindex="0"
-  >
-    {#if gameOver}
-      <GameOver {score} {highscore} on:retry={retry} />
-    {/if}
+    <PlayerHud {lives} {score} {highscore} {fireRate} />
+    <Inventory {inventory} />
 
-    <div class:rapid={rapidFireActive} class="player" style="left: {mouseX}px; top: {mouseY}px;">🚀</div>
+    <div
+      bind:this={gameArea}
+      class="game-area"
+      on:mousemove={movePlayer}
+      on:touchmove|preventDefault={movePlayerTouch}
+      on:click={startSound}
+      role="application"
+      tabindex="0"
+    >
+      {#if gameOver}
+        <GameOver {score} {highscore} on:retry={retry} />
+      {/if}
 
-    {#each bullets as bullet}
-      <div class="bullet" style="left: {bullet.x}px; top: {bullet.y}px;"></div>
-    {/each}
+      <div class:rapid={rapidFireActive} class="player" style="left: {mouseX}px; top: {mouseY}px;">🚀</div>
 
-    {#each enemies as enemy}
-      <div class="enemy" style="left: {enemy.x}px; top: {enemy.y}px;">👾</div>
-    {/each}
+      {#each bullets as bullet}
+        <div class="bullet" style="left: {bullet.x}px; top: {bullet.y}px;"></div>
+      {/each}
 
-    {#each enemyBullets as bullet}
-      <div class="enemy-bullet" style="left: {bullet.x}px; top: {bullet.y}px;"></div>
-    {/each}
+      {#each enemies as enemy}
+        <div class="enemy" style="left: {enemy.x}px; top: {enemy.y}px;">👾</div>
+      {/each}
 
-    {#each powerups as powerup}
-      <div class="powerup" style="left: {powerup.x}px; top: {powerup.y}px;">
-        {powerup.type === 'Life' ? '❤️' : '⚡'}
-      </div>
-    {/each}
+      {#each enemyBullets as bullet}
+        <div class="enemy-bullet" style="left: {bullet.x}px; top: {bullet.y}px;"></div>
+      {/each}
 
-    {#each obstacles as obstacle}
-      <img
-        src={meteorImg}
-        alt="Meteorito"
-        class="obstacle"
-        style="
-          left: {obstacle.x}px;
-          top: {obstacle.y}px;
-          width: {obstacle.w}px;
-          height: {obstacle.h}px;
-          transform: translate(-50%, -50%) rotate({obstacle.rotation || 0}deg);
-        "
-      />
-    {/each}
+      {#each powerups as powerup}
+        <div class="powerup" style="left: {powerup.x}px; top: {powerup.y}px;">
+          {powerup.type === 'Life' ? '❤️' : '⚡'}
+        </div>
+      {/each}
 
-    {#each effects as effect}
-      <div
-        class="effect {effect.type}"
-        style="left: {effect.x}px; top: {effect.y}px;"
-      ></div>
-    {/each}
-  </div>
+      {#each obstacles as obstacle}
+        <img
+          src={meteorImg}
+          alt="Meteorito"
+          class="obstacle"
+          style="
+            left: {obstacle.x}px;
+            top: {obstacle.y}px;
+            width: {obstacle.w}px;
+            height: {obstacle.h}px;
+            transform: translate(-50%, -50%) rotate({obstacle.rotation || 0}deg);
+          "
+        />
+      {/each}
+
+      {#each effects as effect}
+        <div
+          class="effect {effect.type}"
+          style="left: {effect.x}px; top: {effect.y}px;"
+        ></div>
+      {/each}
+    </div>
+  {/if}
 </main>
 
 <style>
@@ -545,6 +563,50 @@
 
   h1 {
     margin-bottom: 10px;
+  }
+
+  .start-screen {
+    min-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .start-screen h1 {
+    font-size: 52px;
+    margin-bottom: 10px;
+  }
+
+  .start-screen p {
+    max-width: 560px;
+    color: #cbd5e1;
+    font-size: 18px;
+    margin: 0;
+  }
+
+  .controls {
+    color: #facc15 !important;
+    font-weight: bold;
+  }
+
+  .start-screen button {
+    margin-top: 24px;
+    background: linear-gradient(90deg, #22c55e, #38bdf8);
+    color: white;
+    border: none;
+    border-radius: 18px;
+    padding: 18px 48px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 25px #38bdf8;
+  }
+
+  .start-screen button:hover {
+    transform: scale(1.08);
   }
 
   .game-area {
@@ -798,6 +860,20 @@
 
     h1 {
       font-size: 22px;
+    }
+
+    .start-screen h1 {
+      font-size: 34px;
+    }
+
+    .start-screen p {
+      font-size: 15px;
+      padding: 0 16px;
+    }
+
+    .start-screen button {
+      font-size: 20px;
+      padding: 15px 38px;
     }
 
     .game-area {
