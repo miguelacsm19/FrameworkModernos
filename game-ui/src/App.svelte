@@ -1,18 +1,18 @@
 <script>
   // @ts-nocheck
 
-  import { onMount } from 'svelte';
-  import PlayerHud from './components/PlayerHud.svelte';
-  import Inventory from './components/Inventory.svelte';
-  import GameOver from './components/GameOver.svelte';
+  import { onMount } from "svelte";
+  import PlayerHud from "./components/PlayerHud.svelte";
+  import Inventory from "./components/Inventory.svelte";
+  import GameOver from "./components/GameOver.svelte";
 
-  import meteorImg from './assets/meteor.png';
+  import meteorImg from "./assets/meteor.png";
 
-  import backgroundMusic from './assets/sounds/background.mp3';
-  import shootSound from './assets/sounds/shoot.mp3';
-  import enemyDeathSound from './assets/sounds/enemy-death.mp3';
-  import damageSound from './assets/sounds/damage.mp3';
-  import gameOverSound from './assets/sounds/gameover.mp3';
+  import backgroundMusic from "./assets/sounds/background.mp3";
+  import shootSound from "./assets/sounds/shoot.mp3";
+  import enemyDeathSound from "./assets/sounds/enemy-death.mp3";
+  import damageSound from "./assets/sounds/damage.mp3";
+  import gameOverSound from "./assets/sounds/gameover.mp3";
 
   let gameArea;
 
@@ -45,7 +45,7 @@
   let bulletId = 1;
   let powerupId = 1;
   let effectId = 1;
-  let nextPowerupType = 'Rapid Fire';
+  let nextPowerupType = "Rapid Fire";
 
   let musicAudio;
   let shootAudio;
@@ -55,14 +55,14 @@
   let soundStarted = false;
 
   onMount(() => {
-    highscore = Number(localStorage.getItem('spaceHighscore')) || 0;
+    highscore = Number(localStorage.getItem("spaceHighscore")) || 0;
     createObstacles();
 
     musicAudio = new Audio(backgroundMusic);
     musicAudio.loop = true;
     musicAudio.volume = 0.25;
 
-    musicAudio.addEventListener('ended', () => {
+    musicAudio.addEventListener("ended", () => {
       musicAudio.currentTime = 0.05;
       musicAudio.play().catch(() => {});
     });
@@ -86,9 +86,9 @@
     const increaseDifficulty = setInterval(makeHarder, 12000);
     const autoShoot = setInterval(shoot, 50);
 
-    window.addEventListener('keydown', handleKeyPress);
-    window.addEventListener('click', startSound);
-    window.addEventListener('touchstart', startSound);
+    window.addEventListener("keydown", handleKeyPress);
+    window.addEventListener("click", startSound);
+    window.addEventListener("touchstart", startSound);
 
     return () => {
       clearInterval(loop);
@@ -98,9 +98,9 @@
       clearInterval(increaseDifficulty);
       clearInterval(autoShoot);
 
-      window.removeEventListener('keydown', handleKeyPress);
-      window.removeEventListener('click', startSound);
-      window.removeEventListener('touchstart', startSound);
+      window.removeEventListener("keydown", handleKeyPress);
+      window.removeEventListener("click", startSound);
+      window.removeEventListener("touchstart", startSound);
 
       if (musicAudio) musicAudio.pause();
     };
@@ -142,7 +142,7 @@
     obstacles = [
       { id: 1, x: 220, y: -100, w: 70, h: 70, speed: 2.2, rotation: 0 },
       { id: 2, x: 620, y: -350, w: 85, h: 85, speed: 1.8, rotation: 40 },
-      { id: 3, x: 850, y: -600, w: 75, h: 75, speed: 2, rotation: 90 }
+      { id: 3, x: 850, y: -600, w: 75, h: 75, speed: 2, rotation: 90 },
     ];
   }
 
@@ -193,12 +193,12 @@
         id: bulletId++,
         x: mouseX + 15,
         y: mouseY,
-        speed: 14
-      }
+        speed: 14,
+      },
     ];
 
     playSound(shootAudio);
-    createEffect(mouseX + 15, mouseY - 20, 'muzzle');
+    createEffect(mouseX + 15, mouseY - 20, "muzzle");
   }
 
   function spawnEnemy() {
@@ -213,8 +213,8 @@
         id: enemyId++,
         x: Math.random() * (gameWidth - 100) + 50,
         y: -60,
-        speed: Math.random() * 1.5 + difficulty
-      }
+        speed: Math.random() * 1.5 + difficulty,
+      },
     ];
   }
 
@@ -226,7 +226,7 @@
     const gameHeight = getGameHeight();
 
     const type = nextPowerupType;
-    nextPowerupType = nextPowerupType === 'Rapid Fire' ? 'Life' : 'Rapid Fire';
+    nextPowerupType = nextPowerupType === "Rapid Fire" ? "Life" : "Rapid Fire";
 
     powerups = [
       ...powerups,
@@ -234,23 +234,23 @@
         id: powerupId++,
         x: Math.random() * (gameWidth - 100) + 50,
         y: Math.random() * (gameHeight - 180) + 80,
-        type
-      }
+        type,
+      },
     ];
   }
 
   function enemyFire() {
     if (!gameStarted || gameOver) return;
 
-    enemies.forEach(enemy => {
+    enemies.forEach((enemy) => {
       enemyBullets = [
         ...enemyBullets,
         {
           id: bulletId++,
           x: enemy.x + 22,
           y: enemy.y + 45,
-          speed: 6
-        }
+          speed: 6,
+        },
       ];
     });
   }
@@ -262,18 +262,18 @@
     const gameHeight = getGameHeight();
 
     bullets = bullets
-      .map(b => ({ ...b, y: b.y - b.speed }))
-      .filter(b => b.y > -20);
+      .map((b) => ({ ...b, y: b.y - b.speed }))
+      .filter((b) => b.y > -20);
 
     enemyBullets = enemyBullets
-      .map(b => ({ ...b, y: b.y + b.speed }))
-      .filter(b => b.y < gameHeight + 50);
+      .map((b) => ({ ...b, y: b.y + b.speed }))
+      .filter((b) => b.y < gameHeight + 50);
 
     enemies = enemies
-      .map(e => ({ ...e, y: e.y + e.speed }))
-      .filter(e => e.y < gameHeight + 50);
+      .map((e) => ({ ...e, y: e.y + e.speed }))
+      .filter((e) => e.y < gameHeight + 50);
 
-    obstacles = obstacles.map(o => {
+    obstacles = obstacles.map((o) => {
       const newY = o.y + o.speed + difficulty * 0.2;
 
       if (newY > gameHeight + 80) {
@@ -282,87 +282,91 @@
           x: Math.random() * (gameWidth - 80) + 40,
           y: -Math.random() * 500 - 100,
           speed: Math.random() * 1.5 + 1.5,
-          rotation: Math.random() * 360
+          rotation: Math.random() * 360,
         };
       }
 
       return {
         ...o,
         y: newY,
-        rotation: (o.rotation || 0) + 3
+        rotation: (o.rotation || 0) + 3,
       };
     });
 
     effects = effects
-      .map(effect => ({ ...effect, life: effect.life - 1 }))
-      .filter(effect => effect.life > 0);
+      .map((effect) => ({ ...effect, life: effect.life - 1 }))
+      .filter((effect) => effect.life > 0);
 
     checkCollisions();
   }
 
   function checkCollisions() {
-    bullets.forEach(bullet => {
-      enemies.forEach(enemy => {
+    bullets.forEach((bullet) => {
+      enemies.forEach((enemy) => {
         if (isColliding(bullet, enemy, 8, 8, 50, 50)) {
-          bullets = bullets.filter(b => b.id !== bullet.id);
-          enemies = enemies.filter(e => e.id !== enemy.id);
+          bullets = bullets.filter((b) => b.id !== bullet.id);
+          enemies = enemies.filter((e) => e.id !== enemy.id);
           score += 100;
 
           playSound(enemyDeathAudio);
-          createEffect(enemy.x + 25, enemy.y + 25, 'explosion');
+          createEffect(enemy.x + 25, enemy.y + 25, "explosion");
         }
       });
     });
 
-    enemyBullets.forEach(bullet => {
+    enemyBullets.forEach((bullet) => {
       if (isColliding(bullet, { x: mouseX, y: mouseY }, 8, 16, 40, 40)) {
-        enemyBullets = enemyBullets.filter(b => b.id !== bullet.id);
+        enemyBullets = enemyBullets.filter((b) => b.id !== bullet.id);
         loseLife();
       }
     });
 
-    enemies.forEach(enemy => {
+    enemies.forEach((enemy) => {
       if (isColliding(enemy, { x: mouseX, y: mouseY }, 50, 50, 40, 40)) {
-        enemies = enemies.filter(e => e.id !== enemy.id);
+        enemies = enemies.filter((e) => e.id !== enemy.id);
         playSound(enemyDeathAudio);
-        createEffect(enemy.x + 25, enemy.y + 25, 'explosion');
+        createEffect(enemy.x + 25, enemy.y + 25, "explosion");
         loseLife();
       }
     });
 
-    obstacles.forEach(obstacle => {
-      if (isColliding(obstacle, { x: mouseX, y: mouseY }, obstacle.w, obstacle.h, 40, 40)) {
+    obstacles.forEach((obstacle) => {
+      if (
+        isColliding(
+          obstacle,
+          { x: mouseX, y: mouseY },
+          obstacle.w,
+          obstacle.h,
+          40,
+          40,
+        )
+      ) {
         loseLife();
 
-        obstacles = obstacles.map(o =>
+        obstacles = obstacles.map((o) =>
           o.id === obstacle.id
             ? {
                 ...o,
                 y: -300,
                 x: Math.random() * (getGameWidth() - 80) + 40,
-                rotation: Math.random() * 360
+                rotation: Math.random() * 360,
               }
-            : o
+            : o,
         );
       }
     });
 
-    powerups.forEach(powerup => {
+    powerups.forEach((powerup) => {
       if (isColliding(powerup, { x: mouseX, y: mouseY }, 32, 32, 40, 40)) {
         inventory = [...inventory, powerup];
-        powerups = powerups.filter(p => p.id !== powerup.id);
-        createEffect(powerup.x + 15, powerup.y + 15, 'pickup');
+        powerups = powerups.filter((p) => p.id !== powerup.id);
+        createEffect(powerup.x + 15, powerup.y + 15, "pickup");
       }
     });
   }
 
   function isColliding(a, b, aw, ah, bw, bh) {
-    return (
-      a.x < b.x + bw &&
-      a.x + aw > b.x &&
-      a.y < b.y + bh &&
-      a.y + ah > b.y
-    );
+    return a.x < b.x + bw && a.x + aw > b.x && a.y < b.y + bh && a.y + ah > b.y;
   }
 
   function createEffect(x, y, type) {
@@ -373,15 +377,15 @@
         x,
         y,
         type,
-        life: type === 'muzzle' ? 8 : 18
-      }
+        life: type === "muzzle" ? 8 : 18,
+      },
     ];
   }
 
   function loseLife() {
     lives -= 1;
     playSound(damageAudio);
-    createEffect(mouseX, mouseY, 'damage');
+    createEffect(mouseX, mouseY, "damage");
 
     if (lives <= 0) {
       lives = 0;
@@ -394,13 +398,13 @@
 
     const key = event.key.toLowerCase();
 
-    if (key === 'q') {
-      const rapidFire = inventory.find(item => item.type === 'Rapid Fire');
+    if (key === "q") {
+      const rapidFire = inventory.find((item) => item.type === "Rapid Fire");
       usePowerup(rapidFire);
     }
 
-    if (key === 'e') {
-      const lifePowerup = inventory.find(item => item.type === 'Life');
+    if (key === "e") {
+      const lifePowerup = inventory.find((item) => item.type === "Life");
       usePowerup(lifePowerup);
     }
   }
@@ -408,10 +412,10 @@
   function usePowerup(powerup) {
     if (!powerup) return;
 
-    if (powerup.type === 'Rapid Fire') {
+    if (powerup.type === "Rapid Fire") {
       rapidFireActive = true;
       fireRate = 150;
-      createEffect(mouseX, mouseY, 'power');
+      createEffect(mouseX, mouseY, "power");
 
       setTimeout(() => {
         fireRate = 450;
@@ -419,14 +423,14 @@
       }, 5000);
     }
 
-    if (powerup.type === 'Life') {
+    if (powerup.type === "Life") {
       if (lives < 3) {
         lives += 1;
-        createEffect(mouseX, mouseY, 'heal');
+        createEffect(mouseX, mouseY, "heal");
       }
     }
 
-    inventory = inventory.filter(item => item.id !== powerup.id);
+    inventory = inventory.filter((item) => item.id !== powerup.id);
   }
 
   function endGame() {
@@ -440,7 +444,7 @@
 
     if (score > highscore) {
       highscore = score;
-      localStorage.setItem('spaceHighscore', String(highscore));
+      localStorage.setItem("spaceHighscore", String(highscore));
     }
   }
 
@@ -455,7 +459,7 @@
 
     difficulty = 1;
     maxEnemies = 4;
-    nextPowerupType = 'Rapid Fire';
+    nextPowerupType = "Rapid Fire";
 
     bullets = [];
     enemyBullets = [];
@@ -505,10 +509,17 @@
         <GameOver {score} {highscore} on:retry={retry} />
       {/if}
 
-      <div class:rapid={rapidFireActive} class="player" style="left: {mouseX}px; top: {mouseY}px;">🚀</div>
+      <div
+        class:rapid={rapidFireActive}
+        class="player"
+        style="left: {mouseX}px; top: {mouseY}px;"
+      ></div>
 
       {#each bullets as bullet}
-        <div class="bullet" style="left: {bullet.x}px; top: {bullet.y}px;"></div>
+        <div
+          class="bullet"
+          style="left: {bullet.x}px; top: {bullet.y}px;"
+        ></div>
       {/each}
 
       {#each enemies as enemy}
@@ -516,12 +527,15 @@
       {/each}
 
       {#each enemyBullets as bullet}
-        <div class="enemy-bullet" style="left: {bullet.x}px; top: {bullet.y}px;"></div>
+        <div
+          class="enemy-bullet"
+          style="left: {bullet.x}px; top: {bullet.y}px;"
+        ></div>
       {/each}
 
       {#each powerups as powerup}
         <div class="powerup" style="left: {powerup.x}px; top: {powerup.y}px;">
-          {powerup.type === 'Life' ? '❤️' : '⚡'}
+          {powerup.type === "Life" ? "❤️" : "⚡"}
         </div>
       {/each}
 
@@ -535,7 +549,8 @@
             top: {obstacle.y}px;
             width: {obstacle.w}px;
             height: {obstacle.h}px;
-            transform: translate(-50%, -50%) rotate({obstacle.rotation || 0}deg);
+            transform: translate(-50%, -50%) rotate({obstacle.rotation ||
+            0}deg);
           "
         />
       {/each}
@@ -615,8 +630,7 @@
     height: min(620px, 70vh);
     margin: 20px auto;
 
-    background:
-      radial-gradient(circle at 20% 30%, white 1px, transparent 2px),
+    background: radial-gradient(circle at 20% 30%, white 1px, transparent 2px),
       radial-gradient(circle at 80% 20%, white 1px, transparent 2px),
       radial-gradient(circle at 50% 70%, white 1px, transparent 2px),
       radial-gradient(circle at 30% 80%, #93c5fd 1px, transparent 2px),
@@ -641,20 +655,36 @@
 
   @keyframes spaceMove {
     from {
-      background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+      background-position:
+        0 0,
+        0 0,
+        0 0,
+        0 0,
+        0 0,
+        0 0;
     }
 
     to {
-      background-position: 0 620px, 0 460px, 0 300px, 0 520px, 0 380px, 0 0;
+      background-position:
+        0 620px,
+        0 460px,
+        0 300px,
+        0 520px,
+        0 380px,
+        0 0;
     }
   }
 
   .player {
     position: absolute;
     transform: translate(-50%, -50%);
-    font-size: 38px;
     z-index: 5;
-    filter: drop-shadow(0 0 10px #38bdf8);
+    background-image: url("./assets/aviao.png");
+    width: 100px;
+    height: 100px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
   }
 
   .player.rapid {
@@ -730,7 +760,13 @@
   .explosion {
     width: 55px;
     height: 55px;
-    background: radial-gradient(circle, #facc15, #f97316, #dc2626, transparent 70%);
+    background: radial-gradient(
+      circle,
+      #facc15,
+      #f97316,
+      #dc2626,
+      transparent 70%
+    );
     border-radius: 50%;
     animation: explode 0.5s ease-out forwards;
   }

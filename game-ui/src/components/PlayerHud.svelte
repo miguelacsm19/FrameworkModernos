@@ -6,10 +6,13 @@
 </script>
 
 <div class="hud">
-  <div>❤️ Vidas: {lives}/3</div>
+  <div>
+    <span class="vida"></span>
+    Vidas: {lives}/3
+  </div>
   <div>⭐ Score: {score}</div>
   <div>🏆 Highscore: {highscore}</div>
-  <div>🔫 Fire Rate: {fireRate === 150 ? 'Rápido' : 'Normal'}</div>
+  <div>🔫 Fire Rate: {fireRate === 150 ? "Rápido" : "Normal"}</div>
 </div>
 
 <style>
@@ -24,5 +27,16 @@
     width: fit-content;
     margin: 0 auto;
     font-weight: bold;
+  }
+
+  .vida {
+    width: 1rem;
+    height: 1rem;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-image: url("./../assets/curacaum.png");
+    position: static;
+    display: inline-block;
   }
 </style>
