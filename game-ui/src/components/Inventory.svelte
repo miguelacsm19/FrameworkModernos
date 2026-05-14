@@ -6,16 +6,16 @@
 </script>
 
 <div class="inventory">
-  <h2>🎒 Inventário</h2>
+  <h2>:school_satchel: Inventário</h2>
 
   <div class="items">
     <div class="item">
-      ⚡ Rapid Fire: {rapidFireCount}
+      :zap: Rapid Fire: {rapidFireCount}
       <span>Tecla Q</span>
     </div>
 
     <div class="item">
-      ❤️ Vida: {lifeCount}
+      <span class="vida"></span> Vida: {lifeCount}
       <span>Tecla E</span>
     </div>
   </div>
@@ -45,5 +45,16 @@
     margin-top: 5px;
     color: #facc15;
     font-size: 14px;
+  }
+  
+  .vida {
+    width: 1rem;
+    height: 1rem;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-image: url("./../assets/curacaum.png");
+    position: static;
+    display: inline-block;
   }
 </style>
