@@ -676,16 +676,19 @@
   }
 
   .player {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    z-index: 5;
-    background-image: url("./assets/aviao.png");
-    width: 100px;
-    height: 100px;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-  }
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+
+  background-image: url("./assets/aviao.png");
+
+  width: 100px;
+  height: 100px;
+
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
 
   .player.rapid {
     filter: drop-shadow(0 0 18px #facc15);
@@ -890,68 +893,72 @@
   }
 
   @media (max-width: 768px) {
-    main {
-      padding: 10px;
-    }
-
-    h1 {
-      font-size: 22px;
-    }
-
-    .start-screen h1 {
-      font-size: 34px;
-    }
-
-    .start-screen p {
-      font-size: 15px;
-      padding: 0 16px;
-    }
-
-    .start-screen button {
-      font-size: 20px;
-      padding: 15px 38px;
-    }
-
-    .game-area {
-      width: 95vw;
-      height: 65vh;
-      border-radius: 12px;
-    }
-
-    .player {
-      font-size: 32px;
-    }
-
-    .enemy {
-      font-size: 36px;
-    }
-
-    .bullet {
-      width: 5px;
-      height: 18px;
-    }
-
-    .enemy-bullet {
-      width: 7px;
-      height: 14px;
-    }
-
-    .powerup {
-      font-size: 28px;
-    }
+  main {
+    padding: 10px;
   }
 
-  @media (max-width: 480px) {
-    .game-area {
-      height: 60vh;
-    }
-
-    .player {
-      font-size: 30px;
-    }
-
-    .enemy {
-      font-size: 34px;
-    }
+  h1 {
+    font-size: 22px;
   }
+
+  .start-screen h1 {
+    font-size: 34px;
+  }
+
+  .start-screen p {
+    font-size: 15px;
+    padding: 0 16px;
+  }
+
+  .start-screen button {
+    font-size: 20px;
+    padding: 15px 38px;
+  }
+
+  .game-area {
+    width: 95vw;
+    height: 65vh;
+    border-radius: 12px;
+  }
+
+  .player {
+    width: 70px;
+    height: 70px;
+    background-size: contain;
+  }
+
+  .enemy {
+    font-size: 36px;
+  }
+
+  .bullet {
+    width: 5px;
+    height: 18px;
+  }
+
+  .enemy-bullet {
+    width: 7px;
+    height: 14px;
+  }
+
+  .powerup {
+    font-size: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-area {
+    height: 60vh;
+  }
+
+  .player {
+    width: 55px;
+    height: 55px;
+    background-size: contain;
+  }
+
+  .enemy {
+    font-size: 34px;
+  }
+}
 </style>
