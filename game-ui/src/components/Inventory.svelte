@@ -1,21 +1,27 @@
 <script>
   export let inventory = [];
 
-  $: rapidFireCount = inventory.filter(item => item.type === 'Rapid Fire').length;
-  $: lifeCount = inventory.filter(item => item.type === 'Life').length;
+  $: rapidFireCount = inventory.filter(
+    item => item.type === 'Rapid Fire'
+  ).length;
+
+  $: lifeCount = inventory.filter(
+    item => item.type === 'Life'
+  ).length;
 </script>
 
 <div class="inventory">
-  <h2>:school_satchel: Inventário</h2>
+  <h2>🎒 Inventário</h2>
 
   <div class="items">
     <div class="item">
-      :zap: Rapid Fire: {rapidFireCount}
+      ⚡ Rapid Fire: {rapidFireCount}
       <span>Tecla Q</span>
     </div>
 
     <div class="item">
-      <span class="vida"></span> Vida: {lifeCount}
+      <span class="vida"></span>
+      Vida: {lifeCount}
       <span>Tecla E</span>
     </div>
   </div>
@@ -30,6 +36,7 @@
     display: flex;
     justify-content: center;
     gap: 15px;
+    flex-wrap: wrap;
   }
 
   .item {
@@ -38,6 +45,7 @@
     border-radius: 12px;
     padding: 10px 16px;
     font-weight: bold;
+    min-width: 160px;
   }
 
   span {
@@ -46,7 +54,7 @@
     color: #facc15;
     font-size: 14px;
   }
-  
+
   .vida {
     width: 1rem;
     height: 1rem;
@@ -56,5 +64,19 @@
     background-image: url("./../assets/curacaum.png");
     position: static;
     display: inline-block;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 768px) {
+    .items {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .item {
+      width: 80%;
+      max-width: 260px;
+    }
   }
 </style>
